@@ -37,17 +37,35 @@ jobs:
       #     key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Install dependencies
         run: poetry install --no-interaction --no-root
+      - name: Validate required API keys are present
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${METACULUS_TOKEN:-}" ]; then
+            echo "Missing METACULUS_TOKEN. Add it under Actions Secrets or Variables."
+            exit 1
+          fi
+          if [ -z "${OPENROUTER_API_KEY:-}" ]; then
+            echo "Missing OPENROUTER_API_KEY. Add it under Actions Secrets or Variables."
+            exit 1
+          fi
+        env:
+          # Support both GitHub Actions Secrets and Variables.
+          # (Users often set these under Variables and the workflow previously only read Secrets.)
+          METACULUS_TOKEN: ${{ secrets.METACULUS_TOKEN || vars.METACULUS_TOKEN || secrets.METACULUS_API_KEY || vars.METACULUS_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY || vars.OPENROUTER_API_KEY }}
       - name: Run bot
         run: |
           poetry run python main.py
         # this reads the environment variables from the github repository.
         # Store under Settings --> Secrets and variables --> Actions
         env:
-          METACULUS_TOKEN: ${{ secrets.METACULUS_TOKEN }} # replace this with the name of the variable under which you stored your own Metaculus token
+          # Support both GitHub Actions Secrets and Variables.
+          METACULUS_TOKEN: ${{ secrets.METACULUS_TOKEN || vars.METACULUS_TOKEN || secrets.METACULUS_API_KEY || vars.METACULUS_API_KEY }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
           EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY || vars.OPENROUTER_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ASKNEWS_CLIENT_ID: ${{ secrets.ASKNEWS_CLIENT_ID }}
           ASKNEWS_SECRET: ${{ secrets.ASKNEWS_SECRET }}

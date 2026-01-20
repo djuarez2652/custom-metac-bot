@@ -700,12 +700,12 @@ if __name__ == "__main__":
         # You may want to change this to the specific tournament ID you want to forecast on
         seasonal_tournament_reports = asyncio.run(
             template_bot.forecast_on_tournament(
-                client.CURRENT_AI_COMPETITION_ID, return_exceptions=True
+                client.CURRENT_AI_COMPETITION_ID, return_exceptions=False
             )
         )
         minibench_reports = asyncio.run(
             template_bot.forecast_on_tournament(
-                client.CURRENT_MINIBENCH_ID, return_exceptions=True
+                client.CURRENT_MINIBENCH_ID, return_exceptions=False
             )
         )
         forecast_reports = seasonal_tournament_reports + minibench_reports
